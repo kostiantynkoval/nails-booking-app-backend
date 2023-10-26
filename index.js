@@ -3,9 +3,11 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import authRoute from './routes/auth.js';
 
 dotenv.config();
 
+const basePath = '/api/v1';
 const app = express();
 const port = process.env.PORT || 8000;
 
@@ -34,6 +36,7 @@ const connectDB = async () => {
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors(corsOptions));
+app.use(`${basePath}/auth`, authRoute);
 
 app.listen(port, () => {
     connectDB().then(() => console.log('Mongo database is connected'))
