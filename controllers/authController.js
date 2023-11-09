@@ -18,7 +18,7 @@ export const register = async (req,res) => {
         } else if (role === Roles.TECHNICIAN) {
             user = await TechnicianSchema.find({email});
         }
-console.log("user @@@@@@@@@@@@@@", user)
+
         if(user && user.length > 0) {
             return res.status(400).json({message: 'User already exists'});
         }
@@ -65,8 +65,8 @@ export const login = async (req,res) => {
         const { email, password } = req.body;
         let user = null;
 
-        const customer = await UserSchema.findOne({email});
-        const technician = await TechnicianSchema.findOne({email});
+        const customer = await UserSchema.findOne({email}).select('-__v');
+        const technician = await TechnicianSchema.findOne({email}).select('-__v');
 
         if(customer) {
             user = customer;
@@ -74,14 +74,13 @@ export const login = async (req,res) => {
         if(technician) {
             user = technician;
         }
-        console.log("customer", customer)
-        console.log("technician", technician)
 
         if (!user) {
             return res.status(404).json({message: "User is not found"});
         }
 
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
+        const {password: hashedPassword, ...data} = user._doc;
+        const isPasswordMatch = await bcrypt.compare(password, hashedPassword);
 
         if(!isPasswordMatch) {
             return res.status(400).json({status: false, message: "Invalid credentials"});
@@ -89,9 +88,7 @@ export const login = async (req,res) => {
 
         const token = generateToken(user);
 
-        const {role, ...rest} = user._doc;
-
-        return res.status(200).json({status: true, message: "Logged in successfully", token, role, data: {...rest}});
+        return res.status(200).json({status: true, message: "Logged in successfully", token, data});
 
     } catch (e) {
         return res.status(500).json({status: false, message: "Login failed"});

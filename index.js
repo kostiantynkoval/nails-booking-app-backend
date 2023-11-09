@@ -4,6 +4,8 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import authRoute from './routes/auth.js';
+import userRoute from './routes/user.js';
+import technicianRoute from './routes/technicians.js';
 
 dotenv.config();
 
@@ -37,6 +39,8 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use(`${basePath}/auth`, authRoute);
+app.use(`${basePath}/users`, userRoute);
+app.use(`${basePath}/technicians`, technicianRoute);
 
 app.listen(port, () => {
     connectDB().then(() => console.log('Mongo database is connected'))
